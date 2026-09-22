@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAHAKAMA YA WILAYA YA MISUNGWI - SYSTEM</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-item-active {
+            background-color: #1e3a8a;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans antialiased text-gray-800">
+
+    <div id="app">
+        <!-- ==================== LOGIN SCREEN ==================== -->
+        <div id="login-screen" class="min-h-screen flex items-center justify-center bg-slate-900 px-4">
+            <div class="max-w-md w-full bg-white rounded-lg shadow-2xl overflow-hidden border border-gray-200">
+                <div class="bg-blue-900 p-6 text-center text-white border-b-4 border-amber-500">
+                    <i class="fa-solid fa-scale-balanced text-5xl text-amber-400 mb-3"></i>
+                    <h2 class="text-xs tracking-widest font-bold uppercase text-amber-300">UNITED REPUBLIC OF TANZANIA</h2>
+                    <h1 class="text-sm font-semibold tracking-wide">JUDICIARY OF TANZANIA</h1>
+                    <div class="my-2 border-t border-blue-800"></div>
+                    <h3 class="text-lg font-bold text-white">COURT CASE MANAGEMENT AND CONNECTIVITY SYSTEM</h3>
+                    <p class="text-xs text-blue-200 font-medium">MAHAKAMA YA WILAYA YA MISUNGWI</p>
+                    <p class="text-xs text-blue-300">MISUNGWI DISTRICT COURT</p>
+                </div>
+                
+                <div class="p-6 bg-gray-50">
+                    <div class="bg-amber-100 border-l-4 border-amber-500 text-amber-800 p-3 text-xs mb-6 rounded">
+                        <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                        <strong>PRIVATE:</strong> AUTHORIZED PERSONNEL ONLY. PUBLIC ACCESS IS STRICTLY PROHIBITED.
+                    </div>
+
+                    <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Aina ya Mtumiaji / Role</label>
+                            <select id="login-role" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-900 bg-white" onchange="toggleCourtSelect()">
+                                <option value="admin">System Admin / IT Admin</option>
+                                <option value="district">Mahakama ya Wilaya ya Misungwi</option>
+                                <option value="primary">Mahakama ya Mwanzo (Primary Court)</option>
+                            </select>
+                        </div>
+
+                        <div id="primary-court-select-container" class="hidden">
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Chagua Mahakama ya Mwanzo</label>
+                            <select id="login-court-code" class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-900 bg-white">
+                                <!-- Dynamic Options -->
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Jina la Mtumiaji (Username)</label>
+                            <input type="text" id="login-username" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-900" placeholder="Ingiza username">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Neno la Siri (Password)</label>
+                            <input type="password" id="login-password" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:border-blue-900" placeholder="••••••••">
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-2.5 rounded text-sm transition duration-200 shadow-md">
+                            <i class="fa-solid fa-lock mr-2"></i> LOGIN / INGIA
+                        </button>
+                    </form>
+                </div>
+                <div class="bg-gray-100 px-6 py-3 border-t border-gray-200 text-center">
+                    <p class="text-[10px] text-gray-500">Mwanza Region | Misungwi District Judiciary Connectivity Module</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== MAIN SYSTEM DASHBOARD ==================== -->
+        <div id="main-system" class="hidden min-h-screen flex flex-col bg-gray-100">
+            <!-- Top Navigation Bar -->
+            <header class="bg-blue-950 text-white shadow-lg border-b-2 border-amber-500 sticky top-0 z-50">
+                <div class="px-6 py-3 flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <i class="fa-solid fa-scale-balanced text-2xl text-amber-400"></i>
+                        <div>
+                            <h1 class="font-bold text-sm leading-none text-white tracking-wide">JUDICIARY OF TANZANIA</h1>
+                            <p class="text-xs text-amber-400 font-semibold mt-0.5" id="header-court-title">MAHAKAMA YA WILAYA YA MISUNGWI</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-xs font-bold text-white" id="user-display-name">Admin User</p>
+                            <p class="text-[10px] text-blue-200" id="user-display-role">System Administrator</p>
+                        </div>
+                        <button onclick="logout()" class="bg-red-700 hover:bg-red-800 text-white text-xs px-3 py-1.5 rounded transition font-medium">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Ondoka
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex flex-1">
+                <!-- Sidebar -->
+                <aside class="w-64 bg-slate-900 text-slate-300 flex-shrink-0 min-h-[calc(100vh-57px)]">
+                    <div class="p-4 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                        MIUDA YAMFUMO / NAVIGATION
+                    </div>
+                    <nav class="mt-2 space-y-1 px-2">
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition sidebar-item-active text-white">
+                            <i class="fa-solid fa-chart-line w-5 text-amber-400"></i>
+                            <span>Dashboard Main</span>
+                        </button>
+                        
+                        <button onclick="switchTab('hierarchy')" id="nav-hierarchy" class="w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition">
+                            <i class="fa-solid fa-sitemap w-5 text-blue-400"></i>
+                            <span>Muundo wa Mahakama (Hierarchy)</span>
+                        </button>
+
+                        <button onclick="switchTab('stations')" id="nav-stations" class="w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition">
+                            <i class="fa-solid fa-building-columns w-5 text-green-400"></i>
+                            <span>Primary Courts & Stations</span>
+                        </button>
+
+                        <button onclick="switchTab('cases')" id="nav-cases" class="w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition">
+                            <i class="fa-solid fa-folder-open w-5 text-purple-400"></i>
+                            <span>Mashitaka & Mashauri (Cases)</span>
+                        </button>
+
+                        <button onclick="switchTab('documents')" id="nav-documents" class="w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition">
+                            <i class="fa-solid fa-file-pdf w-5 text-red-400"></i>
+                            <span>Nyaraka (Documents)</span>
+                        </button>
+
+                        <button onclick="switchTab('audit')" id="nav-audit" class="admin-only w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded text-left hover:bg-slate-800 hover:text-white transition">
+                            <i class="fa-solid fa-shield-halved w-5 text-yellow-400"></i>
+                            <span>Audit Logs & Security</span>
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Main Content Area -->
+                <main class="flex-1 p-6 overflow-y-auto">
+
+                    <!-- TAB 1: DASHBOARD -->
+                    <div id="tab-dashboard" class="tab-content space-y-6">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800" id="dash-title">MAHAKAMA YA WILAYA YA MISUNGWI</h2>
+                                <p class="text-xs text-gray-500">Mwanza Region $\rightarrow$ Misungwi District Dashboard Overview</p>
+                            </div>
+                            <span class="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full border border-green-300">
+                                <i class="fa-solid fa-circle text-[8px] mr-1 text-green-500"></i> System Active
+                            </span>
+                        </div>
+
+                        <!-- Dashboard Cards Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="stat-cards-container">
+                            <!-- Populated dynamically via JavaScript -->
+                        </div>
+
+                        <!-- System Notice -->
+                        <div class="bg-blue-50 border-l-4 border-blue-900 p-4 rounded shadow-sm">
+                            <h4 class="text-sm font-bold text-blue-900"><i class="fa-solid fa-circle-info mr-2"></i>Misungwi District Connectivity Protocol</h4>
+                            <p class="text-xs text-blue-800 mt-1">
+                                Utaratibu huu unaziunganisha Mahakama zote za Mwanzo zilizo chini ya Wilaya ya Misungwi. Kumbukumbu zote zinalindwa kwa mujibu wa sheria za Mtandao na Muundo wa Mahakama ya Tanzania.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: COURT HIERARCHY -->
+                    <div id="tab-hierarchy" class="tab-content hidden space-y-6">
+                        <h2 class="text-xl font-bold text-gray-800 border-b pb-2">MUUNDO RASMI WA MAHAKAMA (OFFICIAL HIERARCHY)</h2>
+                        <div class="bg-white p-6 rounded-lg shadow border border-gray-200 max-w-2xl">
+                            <ul class="space-y-3 text-sm font-medium text-gray-700">
+                                <li class="flex items-center space-x-2 text-blue-900 font-bold">
+                                    <i class="fa-solid fa-landmark"></i> <span>JUDICIARY OF TANZANIA</span>
+                                </li>
+                                <li class="pl-6 flex items-center space-x-2 text-gray-800 font-semibold">
+                                    <i class="fa-solid fa-angle-right text-gray-400"></i> <span>MWANZA REGION</span>
+                                </li>
+                                <li class="pl-12 flex items-center space-x-2 text-gray-800 font-semibold">
+                                    <i class="fa-solid fa-angle-right text-gray-400"></i> <span>MISUNGWI DISTRICT</span>
+                                </li>
+                                <li class="pl-16 flex items-center space-x-2 text-blue-800 font-bold bg-blue-50 p-2 rounded border border-blue-200">
+                                    <i class="fa-solid fa-building"></i> <span>MISUNGWI DISTRICT COURT (Mahakama Kuu ya Wilaya)</span>
+                                </li>
+                                <li class="pl-24 flex items-center space-x-2 text-amber-700 font-semibold">
+                                    <i class="fa-solid fa-angles-right text-amber-500"></i> <span>PRIMARY COURTS (Mahakama za Mwanzo)</span>
+                                </li>
+                                <li class="pl-32 flex items-center space-x-2 text-gray-600">
+                                    <i class="fa-solid fa-circle-dot text-green-600"></i> <span>PRIMARY COURT STATIONS</span>
+                                </li>
+                                <li class="pl-40 flex items-center space-x-2 text-gray-500 text-xs">
+                                    <i class="fa-solid fa-users"></i> <span>AUTHORIZED USERS $\rightarrow$ CASES $\rightarrow$ PARTIES $\rightarrow$ DOCUMENTS</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: STATIONS MANAGEMENT -->
+                    <div id="tab-stations" class="tab-content hidden space-y-6">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">PRIMARY COURT STATIONS MODULE</h2>
+                                <p class="text-xs text-gray-500">Orodha na Usimamizi wa Mahakama za Mwanzo na Vituo vyake Wilayani Misungwi</p>
+                            </div>
+                            <button onclick="openAddStationModal()" class="admin-only bg-amber-500 hover:bg-amber-600 text-blue-950 font-bold px-4 py-2 rounded text-xs shadow flex items-center space-x-1">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Sajili Mahakama / Kituo Kipya</span>
+                            </button>
+                        </div>
+
+                        <!-- Stations Table -->
+                        <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-900 text-white font-bold uppercase tracking-wider border-b border-gray-300">
+                                        <th class="p-3">Court Code</th>
+                                        <th class="p-3">Jina la Mahakama</th>
+                                        <th class="p-3">Type</th>
+                                        <th class="p-3">Kata (Ward)</th>
+                                        <th class="p-3">Parent District</th>
+                                        <th class="p-3">Hali (Status)</th>
+                                        <th class="p-3 text-center admin-only">Vitendo (Actions)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stations-table-body" class="divide-y divide-gray-200">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: CASES MODULE -->
+                    <div id="tab-cases" class="tab-content hidden space-y-6">
+                        <div class="flex justify-between items-center border-b pb-4">
+                            <div>
+                                <h2 class="text-xl font-bold text-gray-800">USIMAMIZI WA MASHAURI (CASE MANAGEMENT)</h2>
+                                <p class="text-xs text-gray-500">Mashauri yote yaliyosajiliwa Misungwi District Court & Primary Courts</p>
+                            </div>
+                            <button onclick="alert('Ukurasa wa kusajili shauri jipya kulingana na taratibu za Mahakama.')" class="bg-blue-900 text-white px-3 py-2 rounded text-xs font-bold hover:bg-blue-800">
+                                <i class="fa-solid fa-plus mr-1"></i> Sajili Shauri Jipya
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-800 text-white font-bold uppercase border-b">
+                                        <th class="p-3">Namba ya Shauri</th>
+                                        <th class="p-3">Wadaawa (Parties)</th>
+                                        <th class="p-3">Mahakama Iliyopo</th>
+                                        <th class="p-3">Aina ya Shauri</th>
+                                        <th class="p-3">Hali (Status)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cases-table-body" class="divide-y divide-gray-200">
+                                    <!-- Cases rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: DOCUMENTS -->
+                    <div id="tab-documents" class="tab-content hidden space-y-4">
+                        <h2 class="text-xl font-bold text-gray-800 border-b pb-2">NYARAKA ZA MAHAKAMA (DOCUMENTS)</h2>
+                        <div class="bg-white p-4 rounded shadow border border-gray-200 text-xs">
+                            <p class="text-gray-600 mb-2"><i class="fa-solid fa-folder text-amber-500 mr-2"></i>Mfumo unahifadhi nyaraka zote za kisheria kwa njia ya kidijitali.</p>
+                            <div class="p-3 bg-gray-50 border rounded text-gray-500">
+                                Hakuna nyaraka zilizowekwa vikwazo kwa sasa kulingana na kiwango chako cha ufikiaji (Access Level).
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: AUDIT LOGS -->
+                    <div id="tab-audit" class="tab-content hidden space-y-4 admin-only">
+                        <h2 class="text-xl font-bold text-gray-800 border-b pb-2">AUDIT LOGS & SECURITY SYSTEM</h2>
+                        <div class="bg-slate-900 text-green-400 p-4 rounded-lg font-mono text-xs space-y-2 shadow">
+                            <p>[SYSTEM INIT]: Seed Record Active -> Mwanza -> Misungwi -> Mahakama ya Wilaya ya Misungwi</p>
+                            <p>[COURT VERIFIED]: MIS-PMC-INONELWA (Mahakama ya Mwanzo Inonelwa) Status: ACTIVE</p>
+                            <p>[ADMIN CONTROL]: IT Admin logged into System Management Console.</p>
+                        </div>
+                    </div>
+
+                </main>
+            </div>
+        </div>
+
+        <!-- ==================== ADD STATION MODAL (ADMIN ONLY) ==================== -->
+        <div id="add-station-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full overflow-hidden border border-gray-300">
+                <div class="bg-blue-950 text-white px-4 py-3 flex justify-between items-center">
+                    <h3 class="text-sm font-bold"><i class="fa-solid fa-building-columns mr-2 text-amber-400"></i>Sajili Primary Court / Station Mpya</h3>
+                    <button onclick="closeAddStationModal()" class="text-gray-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <form onsubmit="saveNewStation(event)" class="p-4 space-y-3 text-xs">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Jina la Mahakama (Station Name)</label>
+                        <input type="text" id="new-station-name" placeholder="Mfano: MAHAKAMA YA MWANZO USAGARA" required class="w-full border px-2.5 py-1.5 rounded focus:border-blue-900">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Court Code</label>
+                            <input type="text" id="new-station-code" placeholder="MIS-PMC-USAGARA" required class="w-full border px-2.5 py-1.5 rounded focus:border-blue-900">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Kata (Ward)</label>
+                            <input type="text" id="new-station-ward" placeholder="Usagara" required class="w-full border px-2.5 py-1.5 rounded focus:border-blue-900">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Parent District</label>
+                            <input type="text" value="Misungwi District" disabled class="w-full border px-2.5 py-1.5 rounded bg-gray-100 font-semibold text-gray-600">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">Region</label>
+                            <input type="text" value="Mwanza" disabled class="w-full border px-2.5 py-1.5 rounded bg-gray-100 font-semibold text-gray-600">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">Barua Pepe (Email)</label>
+                        <input type="email" id="new-station-email" placeholder="usagara.pmc@judiciary.go.tz" class="w-full border px-2.5 py-1.5 rounded focus:border-blue-900">
+                    </div>
+
+                    <div class="flex justify-end space-x-2 pt-3 border-t">
+                        <button type="button" onclick="closeAddStationModal()" class="px-3 py-1.5 bg-gray-300 text-gray-800 rounded font-bold">Ghairi</button>
+                        <button type="submit" class="px-4 py-1.5 bg-blue-900 text-white rounded font-bold hover:bg-blue-800">Hifadhi Kituo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== SYSTEM JAVASCRIPT ARCHITECTURE ==================== -->
+    <script>
+        // Database Architecture (Persistent LocalStorage Database System)
+        const DEFAULT_DATA = {
+            region: "Mwanza",
+            district: "Misungwi",
+            districtCourt: "Mahakama ya Wilaya ya Misungwi",
+            primaryCourts: [
+                {
+                    code: "MIS-PMC-INONELWA",
+                    name: "MAHAKAMA YA MWANZO INONELWA",
+                    type: "Primary Court",
+                    parentDistrict: "Misungwi District",
+                    region: "Mwanza",
+                    ward: "Inonelwa",
+                    status: "Active",
+                    createdDate: "2026-01-15"
+                }
+            ],
+            cases: [
+                { id: "MIS/CIV/01/2026", parties: "John Doe vs Jane Doe", court: "Mahakama ya Wilaya ya Misungwi", type: "Civil", status: "Pending" },
+                { id: "INON/CRIM/04/2026", parties: "Jamhuri vs Juma Hamisi", court: "MAHAKAMA YA MWANZO INONELWA", type: "Criminal", status: "Completed" }
+            ]
+        };
+
+        // Load data from LocalStorage or seed default
+        function getDB() {
+            const data = localStorage.getItem('misungwi_court_db');
+            if (!data) {
+                localStorage.setItem('misungwi_court_db', JSON.stringify(DEFAULT_DATA));
+                return DEFAULT_DATA;
+            }
+            return JSON.parse(data);
+        }
+
+        function saveDB(data) {
+            localStorage.setItem('misungwi_court_db', JSON.stringify(data));
+        }
+
+        // Global State Variables
+        let currentUser = null;
+
+        // Populate Court Select Options dynamically
+        function toggleCourtSelect() {
+            const role = document.getElementById('login-role').value;
+            const container = document.getElementById('primary-court-select-container');
+            const select = document.getElementById('login-court-code');
+
+            if (role === 'primary') {
+                container.classList.remove('hidden');
+                const db = getDB();
+                select.innerHTML = db.primaryCourts.map(pc => `<option value="${pc.code}">${pc.name} (${pc.code})</option>`).join('');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // Handle Login Logic
+        function handleLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('login-role').value;
+            const username = document.getElementById('login-username').value;
+            const db = getDB();
+
+            if (role === 'admin') {
+                currentUser = { name: username, role: 'System Administrator', type: 'admin', court: 'Misungwi District HQ' };
+            } else if (role === 'district') {
+                currentUser = { name: username, role: 'District Magistrate / Clerk', type: 'district', court: db.districtCourt };
+            } else {
+                const code = document.getElementById('login-court-code').value;
+                const pc = db.primaryCourts.find(p => p.code === code);
+                currentUser = { name: username, role: 'Primary Court Officer', type: 'primary', court: pc ? pc.name : 'Primary Court' };
+            }
+
+            // UI Adjustments
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-system').classList.remove('hidden');
+
+            document.getElementById('user-display-name').innerText = currentUser.name;
+            document.getElementById('user-display-role').innerText = currentUser.role;
+            document.getElementById('header-court-title').innerText = currentUser.court;
+
+            // Permissions Control
+            const adminElements = document.querySelectorAll('.admin-only');
+            adminElements.forEach(el => {
+                if (currentUser.type === 'admin') el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            renderDashboard();
+            renderStationsTable();
+            renderCasesTable();
+        }
+
+        // Logout Procedure
+        function logout() {
+            currentUser = null;
+            document.getElementById('main-system').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        }
+
+        // Render Dashboard Statistics Dynamic Cards
+        function renderDashboard() {
+            const db = getDB();
+            const container = document.getElementById('stat-cards-container');
+            const title = document.getElementById('dash-title');
+
+            if (currentUser.type === 'admin' || currentUser.type === 'district') {
+                title.innerText = "MAHAKAMA YA WILAYA YA MISUNGWI - OVERVIEW";
+                container.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-900">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Total Primary Courts</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${db.primaryCourts.length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-amber-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Total Cases (Mashauri)</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${db.cases.length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Active System Stations</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${db.primaryCourts.filter(c => c.status === 'Active').length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">District System Users</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">Authorized</p>
+                    </div>
+                `;
+            } else {
+                title.innerText = currentUser.court;
+                const courtCases = db.cases.filter(c => c.court === currentUser.court);
+                container.innerHTML = `
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-900">
+                        <p class="text-xs text-gray-500 font-bold uppercase">My Cases</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${courtCases.length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-amber-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Pending Cases</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${courtCases.filter(c => c.status === 'Pending').length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Completed Cases</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">${courtCases.filter(c => c.status === 'Completed').length}</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Shared Documents</p>
+                        <p class="text-2xl font-black text-gray-800 mt-1">0</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Render Primary Court Stations Table
+        function renderStationsTable() {
+            const db = getDB();
+            const tbody = document.getElementById('stations-table-body');
+            tbody.innerHTML = db.primaryCourts.map(pc => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 font-mono text-blue-900 font-bold">${pc.code}</td>
+                    <td class="p-3 font-bold text-gray-800">${pc.name}</td>
+                    <td class="p-3">${pc.type}</td>
+                    <td class="p-3">${pc.ward}</td>
+                    <td class="p-3">${pc.parentDistrict}</td>
+                    <td class="p-3"><span class="bg-green-100 text-green-800 px-2 py-0.5 rounded text-[10px] font-bold">${pc.status}</span></td>
+                    <td class="p-3 text-center admin-only">
+                        <button onclick="toggleStationStatus('${pc.code}')" class="text-xs text-blue-700 hover:underline font-bold">Badili Hali</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Cases Table
+        function renderCasesTable() {
+            const db = getDB();
+            const tbody = document.getElementById('cases-table-body');
+            tbody.innerHTML = db.cases.map(c => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-3 font-mono font-bold text-blue-900">${c.id}</td>
+                    <td class="p-3 font-medium">${c.parties}</td>
+                    <td class="p-3">${c.court}</td>
+                    <td class="p-3">${c.type}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 text-[10px] rounded font-bold ${c.status === 'Pending' ? 'bg-amber-100 text-amber-800' : 'bg-green-100 text-green-800'}">${c.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Modal Handlers
+        function openAddStationModal() {
+            document.getElementById('add-station-modal').classList.remove('hidden');
+        }
+
+        function closeAddStationModal() {
+            document.getElementById('add-station-modal').classList.add('hidden');
+        }
+
+        // Save New Primary Court / Station dynamically (Admin Action)
+        function saveNewStation(e) {
+            e.preventDefault();
+            const db = getDB();
+            
+            const newStation = {
+                code: document.getElementById('new-station-code').value.trim(),
+                name: document.getElementById('new-station-name').value.trim(),
+                type: "Primary Court",
+                parentDistrict: "Misungwi District",
+                region: "Mwanza",
+                ward: document.getElementById('new-station-ward').value.trim(),
+                status: "Active",
+                createdDate: new Date().toISOString().split('T')[0]
+            };
+
+            db.primaryCourts.push(newStation);
+            saveDB(db);
+
+            alert('Mahakama / Kituo kipya kimesajiliwa kikamilifu bila kubadili code!');
+            closeAddStationModal();
+            renderStationsTable();
+            renderDashboard();
+            toggleCourtSelect();
+        }
+
+        // Toggle Station Active/Inactive Status
+        function toggleStationStatus(code) {
+            const db = getDB();
+            const court = db.primaryCourts.find(c => c.code === code);
+            if (court) {
+                court.status = court.status === 'Active' ? 'Inactive' : 'Active';
+                saveDB(db);
+                renderStationsTable();
+                renderDashboard();
+            }
+        }
+
+        // Tab Navigation Router
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('sidebar-item-active', 'text-white'));
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) activeNav.classList.add('sidebar-item-active', 'text-white');
+        }
+
+        // Init on load
+        toggleCourtSelect();
+    </script>
+</body>
+</html>
